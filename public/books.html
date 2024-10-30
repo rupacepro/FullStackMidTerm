@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Inventory</title>
+  <style>
+    /* Basic reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .nav {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #007BFF;
+      font-weight: bold;
+    }
+
+    #book-list {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
+      padding: 10px;
+    }
+
+    .book-item {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-item div {
+      flex: 1;
+      color: #2c3e50;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .add-button {
+      background-color: #27ae60;
+      margin-top: 10px;
+    }
+
+    .delete-button {
+      background-color: #e74c3c;
+    }
+
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="books.html">Books</a>
+    <a href="register.html">Register Customer</a>
+    <a href="order.html">Place Order</a>
+  </div>
+
+  <h1>Book Inventory</h1>
+  
+  <!-- Display Book List -->
+  <div id="book-list"></div>
+
+  <!-- Form to Add a New Book -->
+  <h2>Add a New Book</h2>
+  <form id="add-book-form">
+    <input type="text" id="title" placeholder="Title" required>
+    <input type="text" id="author" placeholder="Author" required>
+    <input type="number" id="price" placeholder="Price" required>
+    <input type="number" id="stock" placeholder="Stock" required>
+    <button type="button" class="add-button" onclick="addBook()">Add Book</button>
+  </form>
+
+  <script>
+    // Fetch and display books from the server
+    fetch('/books')
+      .then(response => response.json())
+      .then(books => {
+        const bookList = document.getElementById('book-list');
+        books.forEach(book => {
+          const div = document.createElement('div');
+          div.classList.add('book-item');
+          div.innerHTML = `<div>${book.title} by ${book.author} - $${book.price} (Stock: ${book.stock})</div>`;
+
+          // Button to delete the book
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.classList.add('delete-button');
+          deleteButton.onclick = () => deleteBook(book.id);
+          div.appendChild(deleteButton);
+
+          bookList.appendChild(div);
+        });
+      });
+
+    // Function to add a new book
+    function addBook() {
+      const title = document.getElementById('title').value;
+      const author = document.getElementById('author').value;
+      const price = document.getElementById('price').value;
+      const stock = document.getElementById('stock').value;
+
+      fetch('/books', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title, author, price, stock })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Book added:', data);
+        window.location.reload(); // Reload page to show updated book list
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    // Function to delete a book
+    function deleteBook(id) {
+      fetch(`/books/${id}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Book deleted:', data);
+        window.location.reload(); // Reload page to show updated book list
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+</body>
+</html>

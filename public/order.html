@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Place Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #order-form {
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    input[type="number"] {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #order-message {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Place Order</h1>
+  <form id="order-form">
+    <input type="number" name="customer_id" placeholder="Customer ID" required />
+    <input type="number" name="book_id" placeholder="Book ID" required />
+    <input type="number" name="quantity" placeholder="Quantity" required />
+    <button type="submit">Place Order</button>
+  </form>
+  <div id="order-message"></div>
+
+  <script>
+    document.getElementById('order-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      fetch('/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_id: formData.get('customer_id'),
+          book_id: formData.get('book_id'),
+          quantity: formData.get('quantity')
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.orderId) {
+          document.getElementById('order-message').textContent = `Order placed with ID: ${data.orderId}`;
+        } else {
+          document.getElementById('order-message').textContent = `Order failed: ${data.message}`;
+        }
+      })
+      .catch(error => {
+        document.getElementById('order-message').textContent = `Order failed: ${error.message}`;
+      });
+    });
+  </script>
+</body>
+</html>
